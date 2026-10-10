@@ -1,0 +1,79 @@
+[
+  {
+    "action": "Create/Login user1",
+    "result": "Success",
+    "error": null
+  },
+  {
+    "action": "Create/Login user2",
+    "result": "Success",
+    "error": null
+  },
+  {
+    "action": "Create/Login user3",
+    "result": "Success",
+    "error": null
+  },
+  {
+    "action": "Create/Login user4",
+    "result": "Success",
+    "error": null
+  },
+  {
+    "action": "Create/Login user5",
+    "result": "Success",
+    "error": null
+  },
+  {
+    "action": "Search User",
+    "result": "Success",
+    "error": null
+  },
+  {
+    "action": "Edit Profile",
+    "result": "Success",
+    "error": null
+  },
+  {
+    "action": "Create DM",
+    "result": "Success",
+    "error": {
+      "conversation": {
+        "id": "0ec4b46d8b103d31d078ff0944fa1657",
+        "type": "DIRECT",
+        "title": null,
+        "direct_key": "a9aec47c20bed9739cddee362a072973:cecfa2cde98b4df85d812c226bb3b8d6",
+        "created_at": "2026-10-10 00:17:11",
+        "owner_id": null,
+        "members": [
+          {
+            "id": "a9aec47c20bed9739cddee362a072973",
+            "name": "User 2",
+            "email": "user2@gmail.com",
+            "member_status": "pending"
+          },
+          {
+            "id": "cecfa2cde98b4df85d812c226bb3b8d6",
+            "name": "User 1",
+            "email": "user1@gmail.com",
+            "member_status": "accepted"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "action": "Create Group",
+    "result": "Failed",
+    "error": {
+      "error": "Internal server error"
+    }
+  },
+  {
+    "action": "Create Group 2 (Same Name)",
+    "result": "Failed",
+    "error": {
+      "error": "Internal server error"
+    }
+  }
+]
