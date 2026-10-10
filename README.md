@@ -1,169 +1,124 @@
 # CampusConnect
 
-> A campus messaging platform that turns conversations into actionable plans.
+> A real-time campus messaging platform designed to connect students seamlessly.
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-green)](https://nodejs.org)
 [![React](https://img.shields.io/badge/React-18-blue)](https://reactjs.org)
 
-## Features
+*(Note: This repository will remain private until the end of the hackathon, in accordance with the submission guidelines. It will be made public when submitting the final entry.)*
 
-- 🔐 **Secure Authentication** – Register, login, and persistent sessions with HttpOnly cookies
-- 💬 **Real-time Messaging** – Socket.IO powered chat with instant delivery
-- 🔍 **User Discovery** – Search any registered student by name or email
-- 💾 **Persistent History** – Messages survive refresh and reconnect
-- ⌨️ **Typing Indicators** – See when the other person is typing
-- 🔔 **Unread Badges** – Never miss a message
-- ⚡ **Action Summary** – AI-powered analysis extracting decisions, tasks, and open questions from any conversation
-- 📱 **Responsive UI** – Works on mobile and desktop
+---
 
-## AI Differentiator: Action Summary
+## 1. Application Architecture
 
-Click **"Action Summary"** in any conversation to get:
+CampusConnect follows a modern client-server architecture:
 
-| Field | Example |
-|---|---|
-| **Decision** | Meet at the library tomorrow at 4 |
-| **Task** | Rahul → prepare slides (deadline: Sunday) |
-| **Task** | Maya → finish the API (deadline: Not specified) |
-| **Open Question** | Who will book the conference room? |
+- **Frontend (Client):** Built with React, Vite, and Tailwind CSS. It is a Single Page Application (SPA) that communicates with the backend via REST APIs for standard data (auth, user search, historical messages) and WebSockets for real-time events.
+- **Backend (Server):** Built using Node.js and Express. It serves REST API endpoints and manages WebSocket connections using Socket.IO.
+- **Database:** Uses `better-sqlite3` for a lightweight, fast, and local persistent SQLite database (`campusconnect.db`).
+- **Authentication:** Uses secure HTTP-only cookies and `express-session`. Sessions are seamlessly shared between Express HTTP routes and Socket.IO connections to ensure WebSocket endpoints are strictly authenticated.
 
-The AI only reports what the conversation explicitly states. No invented tasks or deadlines.
+## 2. Real-Time Communication Technology
 
-## Architecture
+Real-time chat functionality is powered by **Socket.IO** (over WebSockets). 
+- When a user successfully authenticates via HTTP, a secure session cookie is set.
+- The Socket.IO client connects to the server and automatically passes this cookie.
+- The server's Socket.IO instance uses middleware to parse the session cookie, ensuring only authenticated users can establish a persistent WebSocket connection.
+- Users are dynamically placed into private Socket.IO "rooms" representing their authorized conversations.
+- When a message is sent via Socket.IO, it is broadcasted instantly to all connected clients in that specific conversation room, enabling instantaneous delivery without polling.
 
-```
-React (Vite + Tailwind)
-    │
-    ├── HTTP  →  Express REST API
-    └── WS    →  Socket.IO (authenticated via session)
-                      │
-                 SQLite (better-sqlite3)
-```
+## 3. Major Features
 
-## Quick Start
+- 💬 **Real-time Messaging** – Instant message delivery using WebSockets.
+- 📎 **Media & File Sharing** – Upload and share images, videos, audio, and documents within chats.
+- 👥 **Direct & Group Chats** – Create 1-on-1 direct conversations or multi-member group chats.
+- 🔔 **Unread Badges & Read Receipts** – Tracks exactly which messages are unread using chronological timestamps and displays double checkmarks for read statuses.
+- ⏳ **Typing Indicators** – Real-time visual feedback when the other participant is typing.
+- 🔍 **User Discovery** – Search for registered students by name or email to easily begin chatting.
+- 📌 **Chat Management** – Pin important chats, mute notifications, and view exact timestamps/date dividers for older messages.
+- 🤖 **Action Summary (AI Integration)** – Extracts decisions, tasks, and open questions from a conversation using Google's Gemini AI.
+
+## 4. Required Environment Variables & External Services
+
+To run this application, you need to configure the following environment variables in `server/.env`:
+
+- `PORT` - The port the backend server runs on (default: `3001`).
+- `SESSION_SECRET` - A cryptographic secret string used to sign session cookies.
+- `AI_API_KEY` - A Google AI API key used for the Action Summary feature (get a free key at [Google AI Studio](https://aistudio.google.com/app/apikey)).
+- `NODE_ENV` - Set to `development` for local testing.
+- `CLIENT_URL` - The URL of the frontend application (default: `http://localhost:5173`) to configure CORS.
+
+**External Services:**
+- Google Gemini API (Strictly for the Action Summary feature). No other external cloud databases or services are required.
+
+---
+
+## 5. Setup & Local Run Instructions (Clean Environment)
+
+Follow these exact steps to reproduce, test, and run the application locally from scratch.
 
 ### Prerequisites
-- Node.js 18+
-- A Google AI API key (for AI summaries) → [Get one free](https://makersuite.google.com/app/apikey)
+- Node.js (v18 or higher)
+- npm (Node Package Manager)
+- Git
 
-### 1. Clone and install
-
+### Step 1: Clone the Repository
 ```bash
-git clone <your-repo>
+git clone <your-private-github-repo-url>
 cd campusconnect
-
-# Install server deps
-cd server && npm install && cd ..
-
-# Install client deps
-cd client && npm install && cd ..
 ```
 
-### 2. Configure environment
-
+### Step 2: Install Dependencies
+Install dependencies for both the server and the client.
 ```bash
-cp server/.env.example server/.env
+# Install server dependencies
+cd server
+npm install
+
+# Install client dependencies
+cd ../client
+npm install
+cd ..
 ```
 
-Edit `server/.env`:
+### Step 3: Configuration
+Copy the example environment file and add your secrets.
+```bash
+cd server
+cp .env.example .env
+```
+Open `server/.env` in your code editor and configure it:
 ```env
 PORT=3001
-SESSION_SECRET=a-long-random-string-here
-AI_API_KEY=your_google_ai_api_key
+SESSION_SECRET=your_super_secret_session_string_here
+AI_API_KEY=your_google_ai_api_key_here
 NODE_ENV=development
 CLIENT_URL=http://localhost:5173
 ```
 
-### 3. Run
+### Step 4: Start the Application
+You will need two terminal windows to run the frontend and backend simultaneously.
 
-**Terminal 1 – Backend:**
+**Terminal 1 (Backend Server):**
 ```bash
 cd server
 npm run dev
 ```
+*(You should see "Server running on port 3001" and "Connected to SQLite database".)*
 
-**Terminal 2 – Frontend:**
+**Terminal 2 (Frontend Client):**
 ```bash
 cd client
 npm run dev
 ```
+*(The Vite server will start, typically on port 5173.)*
 
-Open [http://localhost:5173](http://localhost:5173)
-
-## Testing the App
-
-Use **two different browser profiles** (not just tabs — they share sessions).
-
-1. Register **Account A** in Chrome
-2. Register **Account B** in a Chrome Incognito window (or Firefox)
-3. From Account A, search for Account B by name
-4. Click to start a conversation
-5. Send messages in both directions
-6. Refresh both windows — history persists
-7. Click **"Action Summary"** after a multi-message conversation
-
-## Project Structure
-
-```
-campusconnect/
-├── server/
-│   ├── src/
-│   │   ├── index.js          # Express + Socket.IO server
-│   │   ├── lib/
-│   │   │   ├── db.js         # SQLite initialization
-│   │   │   └── socket.js     # Socket.IO event handlers
-│   │   └── routes/
-│   │       ├── auth.js       # Register, login, logout, /me
-│   │       ├── users.js      # User search
-│   │       ├── conversations.js  # Conversations + messages
-│   │       └── summary.js    # AI summary endpoint
-│   ├── .env.example
-│   └── package.json
-└── client/
-    ├── src/
-    │   ├── App.jsx
-    │   ├── hooks/useAuth.jsx  # Auth context
-    │   ├── lib/
-    │   │   ├── api.js         # HTTP client
-    │   │   └── socket.js      # Socket.IO singleton
-    │   ├── pages/
-    │   │   ├── AuthPage.jsx   # Login / Register
-    │   │   └── ChatPage.jsx   # Main chat UI
-    │   └── components/
-    │       └── ChatWindow.jsx # Chat + Summary panel
-    ├── vite.config.js
-    └── package.json
-```
-
-## Security Notes
-
-- Passwords hashed with bcrypt (12 rounds)
-- Session regenerated on login
-- HttpOnly, SameSite cookies
-- Auth guard on every conversation operation
-- Socket rooms require membership verification
-- AI summary is user-triggered only; never automatic
-- No message HTML injection — all content rendered as text
-
-## API Reference
-
-| Method | Path | Description |
-|---|---|---|
-| POST | `/api/auth/register` | Create account |
-| POST | `/api/auth/login` | Login |
-| POST | `/api/auth/logout` | Logout |
-| GET | `/api/auth/me` | Current user |
-| GET | `/api/users?search=` | Search students |
-| GET | `/api/conversations` | My conversations |
-| POST | `/api/conversations/direct` | Start/get direct chat |
-| GET | `/api/conversations/:id/messages` | Message history |
-| POST | `/api/conversations/:id/summary` | AI action summary |
-
-## Built With
-
-- [React](https://reactjs.org) + [Vite](https://vitejs.dev)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Socket.IO](https://socket.io)
-- [Express](https://expressjs.com)
-- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
-- [Google Gemini API](https://ai.google.dev)
+### Step 5: Testing the Application
+1. Open your web browser and navigate to `http://localhost:5173`.
+2. **Create Account A:** Register a new user (e.g., `userA@example.com`).
+3. **Open a New Browser Profile (or Incognito Window):** This ensures cookies don't overlap. Navigate to `http://localhost:5173` again.
+4. **Create Account B:** Register a second user (e.g., `userB@example.com`).
+5. **Start Chatting:** On Account A, use the search bar to find Account B. Click to start a conversation.
+6. **Test Real-Time:** Send a message from Account A. It will appear instantly on Account B's screen without refreshing, validating the WebSocket connection.
+7. **Test Media:** Click the attachment icon to send an image or file.
+8. **Test Persistence:** Refresh both browsers. The chat history and session will seamlessly persist.
